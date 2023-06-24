@@ -12,6 +12,6 @@ cat *js | grep -r -E "aws_access_key|aws_secret_key|api key|passwd|pwd|heroku|sl
 
 ## Extract urls from JS files:
 
-cat alivejs.txt | grep -aoP "(?<=('|\`|\"))/[a-zA-Z0-9_?&=/\-#.]*?(?=('|\`|\"))" | sort -u
+grep -aoP "(?<=('|\\\`|\"))(/[a-zA-Z0-9_?&=/\-#.]*?)(?=('|\\\`|\"))" | sort -u
 
 
