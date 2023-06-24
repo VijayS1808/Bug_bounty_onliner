@@ -15,3 +15,16 @@ cat *js | grep -r -E "aws_access_key|aws_secret_key|api key|passwd|pwd|heroku|sl
 grep -aoP "(?<=('|\\\`|\"))(/[a-zA-Z0-9_?&=/\-#.]*?)(?=('|\\\`|\"))" | sort -u
 
 
+## Download js files from whole js.txt files:
+
+#!/bin/bash
+
+while IFS= read -r url; do
+    echo "Downloading: $url"
+    wget "$url" -P  /home/vijay/Desktop/Bug_Bounty/nasa/JS
+done < alivejs.txt
+
+
+
+
+
