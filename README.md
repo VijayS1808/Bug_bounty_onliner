@@ -29,6 +29,22 @@ done < alivejs.txt
 
 cat sub.txt | rush -j40 'if curl -Iks -m 10 "{}/https://redirect.com" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com" || curl -Iks -m 10 "{}/redirect.com" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com" || curl -Iks -m 10 "{}////;@redirect.com" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com" || curl -Iks -m 10 "{}/////redirect.com" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "{} It seems an Open Redirect Found"; fi'
 
+## On Parameters (File containing urls with parameters)
+
+
+cat redirect.txt | qsreplace "https://redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
+
+# Test Case 2
+
+cat redirect.txt | qsreplace "redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
+
+# Test Case 3
+
+cat redirect.txt | qsreplace "////;@redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
+
+# Test Case 4
+
+cat redirect.txt | qsreplace "/////redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
 
 
 
