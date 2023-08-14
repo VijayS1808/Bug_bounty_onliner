@@ -46,6 +46,6 @@ cat redirect.txt | qsreplace "////;@redirect.com" | rush -j40 'if curl -Iks -m 1
 
 cat redirect.txt | qsreplace "/////redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
 
-
+cat js.txt | while read line; do curl $line -s -k; done | grep -oh "\"\/[a-zA-Z0-9_/?=&]*\"" | sed -e 's/^"//' -e 's/"$//' | sort -u
 
 
