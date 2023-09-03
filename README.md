@@ -46,6 +46,23 @@ cat redirect.txt | qsreplace "////;@redirect.com" | rush -j40 'if curl -Iks -m 1
 
 cat redirect.txt | qsreplace "/////redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
 
+## Extract urls from Js files:
+
 cat js.txt | while read line; do curl $line -s -k; done | grep -oh "\"\/[a-zA-Z0-9_/?=&]*\"" | sed -e 's/^"//' -e 's/"$//' | sort -u
+
+
+## CRLF On Live Urls with Parameters:
+
+cat urls.txt | qsreplace "%0d%0acrlf:crlf" | rush -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
+
+# Test1:
+
+cat urls.txt | qsreplace "%E5%98%8D%E5%98%8Acrlf:crlf" | rush -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
+
+# Test2:
+
+cat urls.txt | qsreplace "%E5%98%8D%E5%98%8Acrlf:crlf" | rush -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
+
+
 
 
