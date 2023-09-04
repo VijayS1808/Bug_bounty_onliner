@@ -139,6 +139,12 @@ cat host.txt | httpx -path //server-status?full=true -status-code -content-lengt
 
 cat host.txt | httpx -ports 80,443,8009,8080,8081,8090,8180,8443 -path /web-console/ -status-code -content-length
 
+## Read DS_store:
+
+xxd -p /home/vijay/Desktop/DS_Store | sed 's/00//g' | tr -d '\n' | sed 's/\([0-9A-F]\{2\}\)/0x\1 /g' | xxd -r -p | strings | sed 's/ptb[LN]ustr//g'
+
+
+
 
 
 
