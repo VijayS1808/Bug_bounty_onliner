@@ -99,7 +99,7 @@ curl -skL "https://in.yahoo.com" | grep 'type="hidden"' | grep -Eo 'name="[^\"]+
 ## Find hidden parameters via Crawl on list of urls
 Explanation – Takes urls list and extracts hidden parameters from the list of urls and saves unique params in the file.
 
-cat alive.txt | rush 'curl -skL "{}" | grep "type\=\"hidden\"" | grep -Eo "name\=\"[^\"]+\"" | cut -d"\"" -f2 | sort -u' | anew params.txt
+cat alive.txt | parallel 'curl -skL "{}" | grep "type\=\"hidden\"" | grep -Eo "name\=\"[^\"]+\"" | cut -d"\"" -f2 | sort -u' | anew params.txt
 
 ##  Find Secrets in Javascripts files via crawling:
 
