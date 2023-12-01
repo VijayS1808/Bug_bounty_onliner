@@ -121,7 +121,7 @@ gau http://vuln.target.com | gf lfi | qsreplace "/etc/passwd" | xargs -I% -P 25 
 ## CORS:
 
 
-gau http://vuln.target.com | while read url;do target=$(curl -s -I -H "Origin: https://evvil.com" -X GET $url) | if grep 'https://evvil.com'; then [Potentional CORS Found]echo $url;else echo Nothing on "$url";fi;done
+gau testphp.vulnweb.com | while read url;do target=$(curl -s -I -H "Origin: https://evil.com" -X GET $url) | if grep 'https://evil.com'; then [ CORS Found]echo $url;else echo Nothing on "$url";fi;done
 
 
 ## Subdomain takeover testing using subjack
