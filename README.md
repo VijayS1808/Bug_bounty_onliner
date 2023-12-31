@@ -160,6 +160,10 @@ cat sub.txt | httpx -silent -nc -p 80,443,8080,8443,9000,9001,9002,9003,8088 -pa
 
 cat sub.txt | httpx -path "/auth.json" -title -status-code -content-length -t 80 -p 80,443,8080,8443,9000,9001,9002,9003
 
+## Onlines for Headi:
+
+for i in $(cat urls); do headi -url $i;done
+
 
 
 
