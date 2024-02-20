@@ -31,10 +31,11 @@ cat sub.txt | parallel -j40 'if curl -Iks -m 10 "{}/https://redirect.com" | grep
 
 ## On Parameters (File containing urls with parameters)
 
+cat redirect.txt | qsreplace "https://redirect.com" | rush -j10 'if curl -Iks -m 10 "{}" | grep -q -E "^(Location|location):.*(http|https)://redirect\.com"; then echo "{}"; fi'
 
-cat redirect.txt | qsreplace "https://redirect.com" | rush -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
 
-# Test Case 2
+
+# Test case 2:
 
 cat redirect.txt | qsreplace "redirect.com" | parallel -j40 'if curl -Iks -m 10 "{}" | grep -E "^(Location|location)\\:(| *| (http|https)\\:\\/\\/| *\\/\\/| [a-zA-Z]*\\.| (http|https)\\:\\/\\/[a-zA-Z]*\\.)redirect\\.com"; then echo "Open Redirect found on {}"; fi'
 
