@@ -1,5 +1,6 @@
 cat sub.txt | while read domain; do 
     clean_domain=$(echo "$domain" | sed -E 's#https?://##')  # Remove http:// or https://
     mkdir -p "output/$clean_domain"  # Ensure the output directory exists
-    photon -u "$( [[ "$domain" =~ ^http ]] && echo "$domain" || echo "https://$domain" )" -o "output/$clean_domain"
+    photon -u "$( [[ "$domain" =~ ^http ]] && echo "$domain" || echo "https://$domain" )" -o "output/$clean_domain" -l 3
 done
+
